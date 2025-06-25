@@ -1,46 +1,51 @@
 #include <stdio.h>
+#include <string.h>
 #include "funcion.h"
 
-int main() {
-    Equipo equipos[NUM_EQUIPOS];
-    Partido partidos[MAX_PARTIDOS];
-    int numPartidos = 0;
-    int opcion;
+int main(int argc, char const *argv[])
+{
+    struct Producto productos[5];
+    struct Venta ventas[5];
+    int opcion, numVentas = 0;
 
-    inicializarEquipos(equipos);
+    do
+    {
+        printf("\n-----------------------------------\n");
+        printf("SISTEMA DE GESTION DE REPUESTOS DE VEHICULOS\n");
+        printf("\n");
+        printf("MENU DE OPCIONES:\n");
+        fflush(stdin);
+        opcion = menu();
+        printf("\n-----------------------------------\n");
 
-    do {
-        printf("\n--- LIGAPRO SERIE A 2025 ---\n");
-        printf("1. Ingresar resultado de partido y goleadores\n");
-        printf("2. Ver tabla de posiciones\n");
-        printf("3. Ver historial de partidos jugados\n");
-        printf("4. Ver goleador del torneo\n");
-        printf("5. Ver goleador de cada equipo\n");
-        printf("6. Salir\n");
-        printf("Seleccione una opcion: ");
-        scanf("%d", &opcion);
-
-        switch(opcion) {
-            case 1:
-                registrarPartido(equipos, partidos, &numPartidos);
-                break;
-            case 2:
-                mostrarTablaPosiciones(equipos);
-                break;
-            case 3:
-                mostrarHistorialPartidos(partidos, numPartidos, equipos);
-                break;
-            case 4:
-                imprimirGoleadoresTorneo(equipos);
-                break;
-            case 5:
-                imprimirGoleadoresPorEquipo(equipos);
-                break;
-            case 6:
-                printf("Programa finalizado.\n");
-                break;
-            default:
-                printf("Opcion invalida.\n");
+        switch (opcion)
+        {
+        case 1:
+            inicializarProductos(productos);
+            break;
+        case 2:
+            if(leerProductos(productos) == 0){
+                printf("No hay repuestos disponibles.\n");
+            }else{
+                imprimirProductos(productos);
+            }
+            break;
+        case 3:
+            realizarVenta(ventas, productos, &numVentas);
+            break;
+        case 4:
+            leerVentas(ventas, &numVentas);
+            if (numVentas == 0) {
+                printf("No hay ventas registradas.\n");
+            } else {
+                listarVentas(ventas, numVentas);
+            }
+            break;
+        case 5:
+            buscarVenta();
+            break;
+        default:
+            break;
         }
     } while (opcion != 6);
 
