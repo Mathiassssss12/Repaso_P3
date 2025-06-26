@@ -104,11 +104,14 @@ void agregarProductoAdicional(struct Producto productos[8], int *numProductosAct
         return;
     }
     printf("Ingrese el nombre del producto #%d: ", *numProductosActuales + 1);
+    fflush(stdin); // Limpiar buffer antes de leer cadena
     leerCadena(productos[*numProductosActuales].nombre, 30);
     printf("Ingrese el precio del producto #%d: ", *numProductosActuales + 1);
     scanf("%f", &productos[*numProductosActuales].precio);
+    fflush(stdin); // Limpiar buffer antes de leer el siguiente dato
     printf("Ingrese el stock del producto #%d: ", *numProductosActuales + 1);
     scanf("%d", &productos[*numProductosActuales].stock);
+    fflush(stdin); // Limpiar buffer por si acaso
 
     (*numProductosActuales)++;
     guardarProductos(productos, *numProductosActuales);
@@ -117,6 +120,9 @@ void agregarProductoAdicional(struct Producto productos[8], int *numProductosAct
 
 void realizarVenta(struct Venta ventas[5], struct Producto productos[8], int numProductosActuales, int *numVentas)
 {
+    // Leer productos actualizados desde archivo
+    leerProductos(productos, &numProductosActuales);
+
     if (*numVentas >= 5) {
         printf("No se pueden registrar más ventas.\n");
         return;
@@ -124,12 +130,15 @@ void realizarVenta(struct Venta ventas[5], struct Producto productos[8], int num
     struct Venta nuevaVenta;
     int numProductos, productoIndex, cantidad;
     printf("Ingrese el nombre del cliente: ");
+    fflush(stdin); // Limpiar buffer antes de leer cadena
     leerCadena(nuevaVenta.clientes.nombre, 30);
     printf("Ingrese la cedula del cliente: ");
     scanf("%d", &nuevaVenta.clientes.cedula);
+    fflush(stdin);
 
     printf("Ingrese el numero de productos diferentes a comprar (max 5): ");
     scanf("%d", &numProductos);
+    fflush(stdin);
     if (numProductos > 5 || numProductos < 1) {
         printf("Numero de productos no valido, se limitará a 5.\n");
         return;
@@ -141,6 +150,7 @@ void realizarVenta(struct Venta ventas[5], struct Producto productos[8], int num
         imprimirProductos(productos, numProductosActuales);
         printf("Seleccione el producto (0-%d): ", numProductosActuales-1);
         scanf("%d", &productoIndex);
+        fflush(stdin);
         if (productoIndex < 0 || productoIndex >= numProductosActuales) {
             printf("Producto no valido, intente de nuevo.\n");
             i--;
@@ -148,6 +158,7 @@ void realizarVenta(struct Venta ventas[5], struct Producto productos[8], int num
         }
         printf("Ingrese la cantidad a comprar (Stock disponible: %d): ", productos[productoIndex].stock);
         scanf("%d", &cantidad);
+        fflush(stdin);
 
         if (cantidad < 1 || cantidad > productos[productoIndex].stock) {
             printf("Cantidad no valida o insuficiente stock. Intente de nuevo.\n");
