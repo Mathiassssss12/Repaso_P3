@@ -2,6 +2,9 @@
 #include <string.h>
 #include "funcion.h"
 
+#define PRODUCTOS_FIJOS 5
+#define TOTAL_PRODUCTOS 8
+
 void leerCadena(char *cadena, int num)
 {
     fflush(stdin);
@@ -21,13 +24,14 @@ int menu()
     printf("3. Realizar Venta.\n");
     printf("4. Listar Ventas.\n");
     printf("5. Buscar Ventas.\n");
-    printf("6. Salir.\n");
+    printf("6. Agregar producto adicional.\n");
+    printf("7. Salir.\n");
     printf(">> ");
     scanf("%d", &opc);
     return opc;
 }
 
-void inicializarProductos(struct Producto productos[5])
+void inicializarProductos(struct Producto productos[8], int *numProductosActuales)
 {
     strcpy(productos[0].nombre, "Filtro de Aceite");
     productos[0].precio = 50.0;
@@ -49,20 +53,23 @@ void inicializarProductos(struct Producto productos[5])
     productos[4].precio = 250.0;
     productos[4].stock = 8;
 
-    guardarProductos(productos);
+    *numProductosActuales = PRODUCTOS_FIJOS; // Solo los 5 fijos al iniciar
+
+    guardarProductos(productos, *numProductosActuales);
+    printf("Productos inicializados correctamente (solo los 5 fijos).\n");
 }
 
-void imprimirProductos(struct Producto productos[5])
+void imprimirProductos(struct Producto productos[8], int numProductosActuales)
 {
     printf("REPUESTOS DISPONIBLES\n");
     printf("#\tNombre\t\t\tPrecio\tStock\n");
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < numProductosActuales; i++)
     {
         printf("%d\t%-20s\t%.2f\t%d\n", i, productos[i].nombre, productos[i].precio, productos[i].stock);
     }
 }
 
-void guardarProductos(struct Producto *productos)
+void guardarProductos(struct Producto *productos, int numProductosActuales)
 {
     FILE *f;
     f = fopen("producto.dat", "wb+");
@@ -70,24 +77,45 @@ void guardarProductos(struct Producto *productos)
         printf("Error al guardar productos.\n");
         return;
     }
-    fwrite(productos, sizeof(struct Producto), 5, f);
+    fwrite(&numProductosActuales, sizeof(int), 1, f); // Guardar cantidad
+    fwrite(productos, sizeof(struct Producto), numProductosActuales, f);
     fclose(f);
 }
 
-int leerProductos(struct Producto productos[5])
+int leerProductos(struct Producto productos[8], int *numProductosActuales)
 {
     FILE *f;
     f = fopen("producto.dat", "rb+");
     if (f == NULL) {
         printf("No existe el archivo de productos.\n");
+        *numProductosActuales = 0;
         return 0;
     }
-    fread(productos, sizeof(struct Producto), 5, f);
+    fread(numProductosActuales, sizeof(int), 1, f);
+    fread(productos, sizeof(struct Producto), *numProductosActuales, f);
     fclose(f);
     return 1;
 }
 
-void realizarVenta(struct Venta ventas[5], struct Producto productos[5], int *numVentas)
+void agregarProductoAdicional(struct Producto productos[8], int *numProductosActuales)
+{
+    if (*numProductosActuales >= TOTAL_PRODUCTOS) {
+        printf("Ya ha ingresado el máximo de productos adicionales permitidos (3).\n");
+        return;
+    }
+    printf("Ingrese el nombre del producto #%d: ", *numProductosActuales + 1);
+    leerCadena(productos[*numProductosActuales].nombre, 30);
+    printf("Ingrese el precio del producto #%d: ", *numProductosActuales + 1);
+    scanf("%f", &productos[*numProductosActuales].precio);
+    printf("Ingrese el stock del producto #%d: ", *numProductosActuales + 1);
+    scanf("%d", &productos[*numProductosActuales].stock);
+
+    (*numProductosActuales)++;
+    guardarProductos(productos, *numProductosActuales);
+    printf("Producto adicional agregado correctamente.\n");
+}
+
+void realizarVenta(struct Venta ventas[5], struct Producto productos[8], int numProductosActuales, int *numVentas)
 {
     if (*numVentas >= 5) {
         printf("No se pueden registrar más ventas.\n");
@@ -110,10 +138,10 @@ void realizarVenta(struct Venta ventas[5], struct Producto productos[5], int *nu
     nuevaVenta.totalVenta = 0.0;
 
     for (int i = 0; i < numProductos; i++) {
-        imprimirProductos(productos);
-        printf("Seleccione el producto (0-4): ");
+        imprimirProductos(productos, numProductosActuales);
+        printf("Seleccione el producto (0-%d): ", numProductosActuales-1);
         scanf("%d", &productoIndex);
-        if (productoIndex < 0 || productoIndex >= 5) {
+        if (productoIndex < 0 || productoIndex >= numProductosActuales) {
             printf("Producto no valido, intente de nuevo.\n");
             i--;
             continue;
@@ -135,7 +163,7 @@ void realizarVenta(struct Venta ventas[5], struct Producto productos[5], int *nu
 
     ventas[*numVentas] = nuevaVenta;
     (*numVentas)++;
-    guardarProductos(productos);
+    guardarProductos(productos, numProductosActuales);
     guardarVentas(ventas, *numVentas);
     printf("Venta realizada exitosamente. Total: %.2f\n", nuevaVenta.totalVenta);
 }

@@ -4,9 +4,10 @@
 
 int main(int argc, char const *argv[])
 {
-    struct Producto productos[5];
+    struct Producto productos[8];
     struct Venta ventas[5];
     int opcion, numVentas = 0;
+    int numProductosActuales = 5; // 5 productos iniciales
 
     do
     {
@@ -21,17 +22,17 @@ int main(int argc, char const *argv[])
         switch (opcion)
         {
         case 1:
-            inicializarProductos(productos);
+            inicializarProductos(productos, &numProductosActuales);
             break;
         case 2:
-            if(leerProductos(productos) == 0){
+            if(leerProductos(productos, &numProductosActuales) == 0){
                 printf("No hay repuestos disponibles.\n");
             }else{
-                imprimirProductos(productos);
+                imprimirProductos(productos, numProductosActuales);
             }
             break;
         case 3:
-            realizarVenta(ventas, productos, &numVentas);
+            realizarVenta(ventas, productos, numProductosActuales, &numVentas);
             break;
         case 4:
             leerVentas(ventas, &numVentas);
@@ -44,10 +45,13 @@ int main(int argc, char const *argv[])
         case 5:
             buscarVenta();
             break;
+        case 6:
+            agregarProductoAdicional(productos, &numProductosActuales);
+            break;
         default:
             break;
         }
-    } while (opcion != 6);
+    } while (opcion != 7);
 
     return 0;
 }
